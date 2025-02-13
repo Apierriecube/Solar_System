@@ -13,6 +13,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
+import com.jme3.util.SkyFactory;
 
 public class App extends SimpleApplication implements ActionListener {
 
@@ -54,6 +55,16 @@ public class App extends SimpleApplication implements ActionListener {
 
     flyCam.setMoveSpeed(20);
 
+    rootNode.attachChild(SkyFactory.createSky(
+        assetManager,
+        assetManager.loadTexture("Textures/Sky/right.png"), 
+        assetManager.loadTexture("Textures/Sky/left.png"),  
+        assetManager.loadTexture("Textures/Sky/top.png"),    
+        assetManager.loadTexture("Textures/Sky/bottom.png"), 
+        assetManager.loadTexture("Textures/Sky/front.png"), 
+        assetManager.loadTexture("Textures/Sky/back.png")    
+    ));
+
     inputManager.addMapping("UpperCam", new KeyTrigger(KeyInput.KEY_SPACE));
     inputManager.addListener(this, "UpperCam");
     inputManager.addMapping("LowerCam", new KeyTrigger(KeyInput.KEY_LSHIFT));
@@ -75,9 +86,9 @@ public class App extends SimpleApplication implements ActionListener {
     pivotT.setLocalTranslation(new Vector3f(30,0,-75));
     rootNode.attachChild(pivotT);
 
-    Sphere soleilSphere = new Sphere(128,128,8f); // create cube shape
-    soleilGeom = new Geometry("Sphere", soleilSphere);  // create cube geometry from the shape
-    Material soleilMat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");  // create a simple material
+    Sphere soleilSphere = new Sphere(128,128,8f); 
+    soleilGeom = new Geometry("Sphere", soleilSphere);  
+    Material soleilMat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
     soleilMat.setTexture("ColorMap", assetManager.loadTexture("Textures/ColoredTex/Sun.jpg"));
     soleilGeom.setMaterial(soleilMat);
 
