@@ -13,23 +13,31 @@ public class Planet{
     
     private final Sphere sphere ;
     private final Geometry geom;
-    private final Material mat;    
+    private final Material mat;  
+    
+    private final String name ;
+    private final double size;
+    private final double weight;
 
     //Factory
-    public static Planet newInstance(int zsample,int radialsample,float radius,AssetManager assetManager,String name){
-        return new Planet(zsample, radialsample, radius, assetManager, name);
+    public static Planet newInstance(int zsample, int radialsample, float radius, AssetManager assetManager, String name, double size, double weight){
+        return new Planet(zsample, radialsample, radius, assetManager,name, size, weight);
     }
 
     //Constructeur sans paramètres
-    private Planet(int zsample,int radialsample,float radius,AssetManager assetManager,String name){
-        this.sphere = new Sphere(zsample, radialsample, radius); // create cube shape
-        this.geom = new Geometry("Sphere", this.sphere);  // create cube geometry from the shape
+    private Planet(int zsample,int radialsample,float radius,AssetManager assetManager,String name,double size,double weight){
+        this.sphere = new Sphere(zsample, radialsample, radius);
+        this.geom = new Geometry("Sphere", this.sphere);  
         this.mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
         this.mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/ColoredTex/" + name + ".jpg"));
         this.mat.setBoolean("UseMaterialColors",true);
         this.mat.setColor("Ambient", ColorRGBA.White);  
         this.mat.setColor("Diffuse", ColorRGBA.White);
         this.geom.setMaterial(this.mat);
+
+        this.name = name;
+        this.size = size;
+        this.weight = weight;
     }
 
 }

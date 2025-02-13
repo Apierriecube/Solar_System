@@ -59,8 +59,8 @@ public class App extends SimpleApplication implements ActionListener {
     inputManager.addMapping("LowerCam", new KeyTrigger(KeyInput.KEY_LSHIFT));
     inputManager.addListener(this, "LowerCam");
 
-    terre = Planet.newInstance(32,32,2f,assetManager, "Earth");
-    lune = Planet.newInstance(16,16,1f,assetManager, "Moon");
+    terre = Planet.newInstance(32,32,2f,assetManager, "Earth", 12.756, 5.975e24);
+    lune = Planet.newInstance(16,16,1f,assetManager, "Moon", 3.475, 7.3e22);
 
     terre.getGeom().rotate(-FastMath.PI/2, 0, 0);
     rootNode.attachChild(terre.getGeom());
@@ -102,10 +102,9 @@ public class App extends SimpleApplication implements ActionListener {
       cam.setLocation(cam.getLocation().add(0, tpf * 10, 0));
     }
 
-    lune.getGeom().rotate(0, 0, 2*tpf);
-    terre.getGeom().rotate(0, 0, 2*tpf);
-    soleilGeom.rotate(0, 0, 2*tpf);
-
+    lune.getGeom().rotate(0, 0, (float) (0.03*tpf));
+    terre.getGeom().rotate(0, 0, (float) (1*tpf));
+    soleilGeom.rotate(0, 0, (float) (0.04*tpf));
     angle += tpf; 
     float xterre = FastMath.cos(angle) * 30;
     float zterre = FastMath.sin(angle) * 30;
