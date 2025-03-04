@@ -9,7 +9,7 @@
 
 	<name>JMonkey Project</name>
 	<description>JMonkey project</description>
-	<url>https://www.seinturier.fr/</url>
+
 
 	<licenses>
 		<license>
@@ -21,16 +21,11 @@
   
 	<developers>
 		<developer>
-			<id>jseinturier</id>
-			<name>Julien Seinturier</name>
-			<email>julien.seinturier@univ-tln.fr</email>
-			<url>http://www.seinturier.fr</url>
+			<id>pnicolas</id>
+			<name>Pierre Nicolas</name>
+			<email>apierriecube.666@gmail.com</email>
 			<organization>Universit&egrave; de Toulon</organization>
 			<organizationUrl>http://www.univ-tln.fr</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
 			<timezone>France/Paris</timezone>
 			<properties><!-- <picUrl>http://www.example.com/jdoe/pic</picUrl> --></properties>
 		</developer>
