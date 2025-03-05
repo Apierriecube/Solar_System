@@ -48,12 +48,6 @@ public class App extends SimpleApplication implements ActionListener {
   private final Node pivotUranus = new Node("pivotUranus");
   private final Node pivotNeptune = new Node("pivotNeptune");
 
-  private final Node pivotLune = new Node("pivotLune");
-  private final Node pivotPhobos = new Node("pivotPhobos");
-  private final Node pivotDeimos = new Node("pivotDeimos");
-  private final Node pivotIo = new Node("pivotIo");
-  private final Node pivotEurope = new Node("pivotEurope");
-  
 
   private boolean lowerCam = false;
   private boolean upperCam = false;
@@ -65,6 +59,8 @@ public class App extends SimpleApplication implements ActionListener {
   //date of the last planets alignment
   LocalDate specificDate = LocalDate.of(2025, 2, 28);
   private float date = 0;
+
+  private Vector3f followedPlanet = null;
   
   /**
    * The main method.
@@ -131,6 +127,27 @@ public class App extends SimpleApplication implements ActionListener {
     inputManager.addMapping("Go", new KeyTrigger(KeyInput.KEY_NUMPAD5));
     inputManager.addListener(this, "Go");
 
+    inputManager.addMapping("Mercury", new KeyTrigger(KeyInput.KEY_1));
+    inputManager.addListener(this, "Mercury");
+    inputManager.addMapping("Venus", new KeyTrigger(KeyInput.KEY_2));
+    inputManager.addListener(this, "Venus");
+    inputManager.addMapping("Earth", new KeyTrigger(KeyInput.KEY_3));
+    inputManager.addListener(this, "Earth");
+    inputManager.addMapping("Mars", new KeyTrigger(KeyInput.KEY_4));
+    inputManager.addListener(this, "Mars");
+    inputManager.addMapping("Jupiter", new KeyTrigger(KeyInput.KEY_5));
+    inputManager.addListener(this, "Jupiter");
+    inputManager.addMapping("Saturn", new KeyTrigger(KeyInput.KEY_6));
+    inputManager.addListener(this, "Saturn");
+    inputManager.addMapping("Uranus", new KeyTrigger(KeyInput.KEY_7));
+    inputManager.addListener(this, "Uranus");
+    inputManager.addMapping("Neptune", new KeyTrigger(KeyInput.KEY_8));
+    inputManager.addListener(this, "Neptune");
+    inputManager.addMapping("Sun", new KeyTrigger(KeyInput.KEY_9));
+    inputManager.addListener(this, "Sun");
+    inputManager.addMapping("None", new KeyTrigger(KeyInput.KEY_0));
+    inputManager.addListener(this, "None");
+
     //sky creation
     rootNode.attachChild(SkyFactory.createSky(
       assetManager,
@@ -156,17 +173,22 @@ public class App extends SimpleApplication implements ActionListener {
     rootNode.attachChild(soleilGeom);
 
     //planet mercure to saturn (with moons)
-    mercure = Planet.newInstance(32,32,1.5f,assetManager, "Mercury", 2439.7, 3.3011e23, rootNode, new Vector3f(141,0,0), pivotMercure, 1);
-    venus = Planet.newInstance(32,32,4f,assetManager, "Venus", 6051.8, 4.8675e24, rootNode, new Vector3f(181,0,0), pivotVenus, 177);
-    terre = Planet.newInstance(32,32,4f,assetManager, "Earth", 	6371, 5.972168e24, rootNode, new Vector3f(217,0,0), pivotTerre, 23);
-    lune = Planet.newInstance(16,16,1f,assetManager, "Moon", 1737.4, 7.346e22, rootNode, new Vector3f(6,0,0), pivotLune, 1);
-    mars = Planet.newInstance(32,32,2f,assetManager, "Mars", 3389.5, 6.4171e23, rootNode, new Vector3f(275,0,0), pivotMars, 25);
-    phobos = Planet.newInstance(32,32,0.1f,assetManager, "Phobos", 11.08, 1.0659e16, rootNode, new Vector3f(2.22f,0,0), pivotDeimos, 1);
-    deimos = Planet.newInstance(32,32,0.1f,assetManager, "Deimos", 6.27, 1.4762e15, rootNode, new Vector3f(3.67f,0,0), pivotPhobos, 1);
-    jupiter = Planet.newInstance(32,32,40f,assetManager, "Jupiter", 69911, 1.8982e27, rootNode, new Vector3f(685,0,0), pivotJupiter, 3);
-    io = Planet.newInstance(32,32,1f,assetManager, "Io", 1821.6, 8.931938e22, rootNode, new Vector3f(46,0,0), pivotIo, 1);
-    europe = Planet.newInstance(32,32,1f,assetManager, "Europe", 1560.8, 4.799844e22, rootNode, new Vector3f(52,0,0), pivotEurope, 1);
-    saturn = Planet.newInstance(32,32,38f,assetManager, "Saturn", 58232, 5.6824e26, rootNode, new Vector3f(1195,0,0), pivotSaturn, 27);
+    mercure = Planet.newInstance(32,32,1.5f,assetManager, "Mercury", 2439.7, 3.3011e23, rootNode, pivotMercure, 1);
+    venus = Planet.newInstance(32,32,4f,assetManager, "Venus", 6051.8, 4.8675e24, rootNode, pivotVenus, 177);
+    terre = Planet.newInstance(32,32,4f,assetManager, "Earth", 	6371, 5.972168e24, rootNode, pivotTerre, 23);
+    lune = Planet.newInstance(16,16,1f,assetManager, "Moon", 1737.4, 7.346e22, rootNode, pivotTerre, 1);
+    lune.getGeom().setLocalTranslation(new Vector3f(6,0,0));
+    mars = Planet.newInstance(32,32,2f,assetManager, "Mars", 3389.5, 6.4171e23, rootNode, pivotMars, 25);
+    phobos = Planet.newInstance(32,32,0.1f,assetManager, "Phobos", 11.08, 1.0659e16, rootNode, pivotMars, 1);
+    phobos.getGeom().setLocalTranslation(new Vector3f(2.22f,0,0));
+    deimos = Planet.newInstance(32,32,0.1f,assetManager, "Deimos", 6.27, 1.4762e15, rootNode, pivotMars, 1);
+    deimos.getGeom().setLocalTranslation(new Vector3f(3.67f,0,0));
+    jupiter = Planet.newInstance(32,32,40f,assetManager, "Jupiter", 69911, 1.8982e27, rootNode, pivotJupiter, 3);
+    io = Planet.newInstance(32,32,1f,assetManager, "Io", 1821.6, 8.931938e22, rootNode, pivotJupiter, 1);
+    io.getGeom().setLocalTranslation(new Vector3f(46,0,0));
+    europe = Planet.newInstance(32,32,1f,assetManager, "Europe", 1560.8, 4.799844e22, rootNode, pivotJupiter, 1);
+    europe.getGeom().setLocalTranslation(new Vector3f(52,0,0));
+    saturn = Planet.newInstance(32,32,38f,assetManager, "Saturn", 58232, 5.6824e26, rootNode, pivotSaturn, 27);
 
     //saturn's rings
     Torus ringShape = new Torus(100, 100, 5, 45);
@@ -178,65 +200,57 @@ public class App extends SimpleApplication implements ActionListener {
     ringGeom.setMaterial(ringMat);
     ringGeom.setLocalScale(1, 1, 0.01f);
     ringGeom.rotate(-FastMath.PI/2, 0, -FastMath.DEG_TO_RAD * 27);
-    ringGeom.setLocalTranslation(new Vector3f(1195,0,0));
     rootNode.attachChild(ringGeom);
     pivotSaturn.attachChild(ringGeom);
 
     //uranus and neptune
-    uranus = Planet.newInstance(32,32,16f,assetManager, "Uranus", 25362, 8.681e25, rootNode, new Vector3f(2217,0,0), pivotUranus, 98);
-    neptune = Planet.newInstance(32,32,15f,assetManager, "Neptune", 24622, 1.02409e26, rootNode, new Vector3f(3337,0,0), pivotNeptune, 30);
+    uranus = Planet.newInstance(32,32,16f,assetManager, "Uranus", 25362, 8.681e25, rootNode, pivotUranus, 98);
+    neptune = Planet.newInstance(32,32,15f,assetManager, "Neptune", 24622, 1.02409e26, rootNode, pivotNeptune, 30);
 
     //creation of the orbits of the planets
-    Orbit.newInstance(139, 139, 0.5f, 141, assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f));
-    Orbit.newInstance(175, 175, 0.5f, 181, assetManager, rootNode, new ColorRGBA(0.7f,0.4f,0f,1f));
-    Orbit.newInstance(200, 200, 0.5f, 217, assetManager, rootNode, new ColorRGBA(0f,0.4f,1f,1f));
-    Orbit.newInstance(200, 200, 0.5f, 275, assetManager, rootNode, new ColorRGBA(0.8f,0.1f,0f,1f));
-    Orbit.newInstance(200, 200, 0.5f, 685, assetManager, rootNode, ColorRGBA.Brown);
-    Orbit.newInstance(200, 200, 0.5f, 1195, assetManager, rootNode, new ColorRGBA(0.9f,0.6f,0f,1f));
-    Orbit.newInstance(200, 200, 0.5f, 2217, assetManager, rootNode, new ColorRGBA(0f,1f,1f,1f));
-    Orbit.newInstance(200, 200, 0.5f, 3337, assetManager, rootNode, new ColorRGBA(0f,0f,1f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 141, 0.978f,assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 181, 0.999f, assetManager, rootNode, new ColorRGBA(0.7f,0.4f,0f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 217, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0.4f,1f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 275, 0.995f, assetManager, rootNode, new ColorRGBA(0.8f,0.1f,0f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 685, 0.998f, assetManager, rootNode, ColorRGBA.Brown);
+    Orbit.newInstance(200, 200, 0.5f, 1195, 0.998f, assetManager, rootNode, new ColorRGBA(0.9f,0.6f,0f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 2217, 0.998f, assetManager, rootNode, new ColorRGBA(0f,1f,1f,1f));
+    Orbit.newInstance(200, 200, 0.5f, 3337, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0f,1f,1f));
 
     //creation of the orbits of the moons
-    Orbit orbitL = Orbit.newInstance(200, 200, 0.1f, 6, assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f));
+    Orbit orbitL = Orbit.newInstance(200, 200, 0.1f, 6, 1, assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f));
     orbitL.getGeom().setLocalTranslation(terre.getGeom().getLocalTranslation());
-    Orbit orbitP = Orbit.newInstance(200, 200, 0.1f,  2.22f, assetManager, rootNode, new ColorRGBA(0.2f,0.2f,0.2f,1f));
+    Orbit orbitP = Orbit.newInstance(200, 200, 0.1f,  2.22f, 1, assetManager, rootNode, new ColorRGBA(0.2f,0.2f,0.2f,1f));
     orbitP.getGeom().setLocalTranslation(mars.getGeom().getLocalTranslation());
-    Orbit orbitD = Orbit.newInstance(200, 200, 0.1f, 3.67f, assetManager, rootNode, new ColorRGBA(0.3f,0.3f,0.3f,1f));
+    Orbit orbitD = Orbit.newInstance(200, 200, 0.1f, 3.67f, 1, assetManager, rootNode, new ColorRGBA(0.3f,0.3f,0.3f,1f));
     orbitD.getGeom().setLocalTranslation(mars.getGeom().getLocalTranslation());
-    Orbit orbitI = Orbit.newInstance(200, 200, 0.1f, 46, assetManager, rootNode, new ColorRGBA(0.5f,0.6f,0f,1f));
+    Orbit orbitI = Orbit.newInstance(200, 200, 0.1f, 46, 1, assetManager, rootNode, new ColorRGBA(0.5f,0.6f,0f,1f));
     orbitI.getGeom().setLocalTranslation(jupiter.getGeom().getLocalTranslation());
-    Orbit orbitE = Orbit.newInstance(200, 200, 0.1f, 52, assetManager, rootNode, new ColorRGBA(0.8f,0.8f,0.8f,1f));
+    Orbit orbitE = Orbit.newInstance(200, 200, 0.1f, 52, 1, assetManager, rootNode, new ColorRGBA(0.8f,0.8f,0.8f,1f));
     orbitE.getGeom().setLocalTranslation(jupiter.getGeom().getLocalTranslation());
 
     //creation of the pivots for the planets and moons rotations
     rootNode.attachChild(pivotMercure);
+    pivotMercure.setLocalTranslation(new Vector3f(141,0,0));
     rootNode.attachChild(pivotVenus);
+    pivotVenus.setLocalTranslation(new Vector3f(181,0,0));
     rootNode.attachChild(pivotTerre);
-    pivotLune.setLocalTranslation(terre.getGeom().getLocalTranslation());
-    rootNode.attachChild(pivotLune);
-    pivotTerre.attachChild(pivotLune);
     pivotTerre.attachChild(orbitL.getGeom());
+    pivotTerre.setLocalTranslation(new Vector3f(217,0,0));
     rootNode.attachChild(pivotMars);
-    pivotPhobos.setLocalTranslation(mars.getGeom().getLocalTranslation());
-    rootNode.attachChild(pivotPhobos);
-    pivotMars.attachChild(pivotPhobos);
     pivotMars.attachChild(orbitP.getGeom());
-    pivotDeimos.setLocalTranslation(mars.getGeom().getLocalTranslation());
-    rootNode.attachChild(pivotDeimos);
-    pivotMars.attachChild(pivotDeimos);
     pivotMars.attachChild(orbitD.getGeom());
+    pivotMars.setLocalTranslation(new Vector3f(275,0,0));
     rootNode.attachChild(pivotJupiter);
-    pivotIo.setLocalTranslation(jupiter.getGeom().getLocalTranslation());
-    rootNode.attachChild(pivotIo);
-    pivotJupiter.attachChild(pivotIo);
     pivotJupiter.attachChild(orbitI.getGeom());
-    pivotEurope.setLocalTranslation(jupiter.getGeom().getLocalTranslation());
-    rootNode.attachChild(pivotEurope);
-    pivotJupiter.attachChild(pivotEurope);
     pivotJupiter.attachChild(orbitE.getGeom());
+    pivotJupiter.setLocalTranslation(new Vector3f(685,0,0));
     rootNode.attachChild(pivotSaturn);
+    pivotSaturn.setLocalTranslation(new Vector3f(1195,0,0));
     rootNode.attachChild(pivotUranus);
+    pivotUranus.setLocalTranslation(new Vector3f(2217,0,0));
     rootNode.attachChild(pivotNeptune);
+    pivotNeptune.setLocalTranslation(new Vector3f(3337,0,0));
 
     //velocity initialization (abort code part for rotation using the newton's law of universal gravitation)
     //terre.setVelocity(new Vector3f(-2,0,-6.95f));
@@ -290,22 +304,26 @@ public class App extends SimpleApplication implements ActionListener {
     neptune.getGeom().rotate(0, 0, (float) (9.3693*tpf));
 
     //rotation of the planets around the sun
-    pivotMercure.rotate(0, (float) (0.0714*tpf), 0);
-    pivotVenus.rotate(0, (float) (0.02796*tpf), 0);
-    pivotTerre.rotate(0, (float) (0.0172*tpf), 0);
-    pivotMars.rotate(0, (float) (0.00915*tpf), 0);
-    pivotJupiter.rotate(0, (float) (0.00145*tpf), 0);
-    pivotSaturn.rotate(0, (float) (0.000585*tpf), 0);
-    pivotUranus.rotate(0, (float) (0.000205*tpf), 0);
-    pivotNeptune.rotate(0, (float) (0.000105*tpf), 0);
+    rotation(pivotTerre, terre, -(float) 0.0172*tpf, 217.0f, 216.97f);
+    rotation(pivotMercure, mercure, -(float) 0.0714*tpf, 141.0f, 137.99f);
+    rotation(pivotVenus, venus, -(float) 0.02796*tpf, 181.0f, 180.99f);
+    rotation(pivotMars, mars, -(float) 0.00915*tpf, 275.0f, 273.80f);
+    rotation(pivotJupiter, jupiter, -(float) 0.00145*tpf, 685.0f, 684.20f);
+    rotation(pivotSaturn, saturn, -(float) 0.000585*tpf, 1195.0f, 	1193.09f);
+    rotation(pivotUranus, uranus, -(float) 0.000205*tpf, 2217.0f, 2214.65f);
+    rotation(pivotNeptune, neptune, -(float) 0.000105*tpf, 3337.0f, 	3336.88f);
 
     //rotation of the moons around their planet
-    pivotLune.rotate(0, (float) (0.2299*tpf), 0);
-    pivotPhobos.rotate(0, (float) (19.7047*tpf), 0);
-    pivotDeimos.rotate(0, (float) (4.9771*tpf), 0);
-    pivotIo.rotate(0, (float) (3.5512*tpf), 0);
-    pivotEurope.rotate(0, (float) (1.7690*tpf), 0);
+    rotation(lune, -(float) 0.2299*tpf, 6.0f, 6.0f);
+    rotation(phobos, -(float) 19.7047*tpf, 2.22f, 2.22f);
+    rotation(deimos, -(float) 4.9771*tpf, 3.67f, 3.67f);
+    rotation(io, -(float) 3.5512*tpf, 46.0f, 46.0f);
+    rotation(europe, -(float) 1.7690*tpf, 52.0f, 52.0f);
 
+    //camera follow the planet
+    if (followedPlanet != null){
+      followPlanet(followedPlanet);
+    }
     //date management
     date += vr;
     if (date>=60){
@@ -349,7 +367,62 @@ public class App extends SimpleApplication implements ActionListener {
       pause = false;
       vr = 1;
     }
+
+    if (name.equals("Mercury")) {
+      followedPlanet = pivotMercure.getLocalTranslation();
+    }
+    if (name.equals("Venus")) {
+      followedPlanet = pivotVenus.getLocalTranslation();
+    }
+    if (name.equals("Earth")) {
+      followedPlanet = pivotTerre.getLocalTranslation();
+    }
+    if (name.equals("Mars")) {
+      followedPlanet = pivotMars.getLocalTranslation();
+    }
+    if (name.equals("Jupiter")) {
+      followedPlanet = pivotJupiter.getLocalTranslation();
+    }
+    if (name.equals("Saturn")) {
+      followedPlanet = pivotSaturn.getLocalTranslation();
+    }
+    if (name.equals("Uranus")) {
+      followedPlanet = pivotUranus.getLocalTranslation();
+    }
+    if (name.equals("Neptune")) {
+      followedPlanet = pivotNeptune.getLocalTranslation();
+    }
+    if (name.equals("Sun")) {
+      followedPlanet = soleilGeom.getLocalTranslation();
+    }
+    if (name.equals("None")) {
+      followedPlanet = null;
+    }
     
+  }
+
+  
+  public void rotation(Node node, Planet planet, float speed,float a,float b){ 
+    float angle = planet.getAngle();
+    angle += speed;
+    float x = a * (float) Math.cos(angle);  
+    float z = b * (float) Math.sin(angle);  
+    planet.setAngle(angle);
+    node.setLocalTranslation( x, node.getLocalTranslation().getY(), z);
+  }
+
+  public void rotation(Planet planet, float speed,float a,float b){ 
+    float angle = planet.getAngle();
+    angle += speed;
+    float x = a * (float) Math.cos(angle);  
+    float z = b * (float) Math.sin(angle);  
+    planet.setAngle(angle);
+    planet.getGeom().setLocalTranslation(x, planet.getGeom().getLocalTranslation().getY(),z);
+  }
+
+  public void followPlanet(Vector3f position){
+    cam.setLocation(position.add(0, 50, -300));
+    cam.lookAt(position.add(0, 0, -300), Vector3f.UNIT_Y);
   }
 
   //two fonction for the rotation using the newton's law of universal gravitation (abort code)

@@ -17,18 +17,18 @@ public class Orbit {
     private final Material mat; 
 
     //Factory
-    public static Orbit newInstance(int circlesamples, int radialsamples, float innerradius, float outradius, AssetManager assetManager, Node rootNode, ColorRGBA color){
-        return new Orbit(circlesamples, radialsamples, innerradius, outradius, assetManager, rootNode, color);
+    public static Orbit newInstance(int circlesamples, int radialsamples, float innerradius, float outradius, float scale, AssetManager assetManager, Node rootNode, ColorRGBA color){
+        return new Orbit(circlesamples, radialsamples, innerradius, outradius, scale, assetManager, rootNode, color);
     }
 
     //Constructeur sans paramètres
-    private Orbit(int circlesamples, int radialsamples, float innerradius, float outradius, AssetManager assetManager, Node rootNode, ColorRGBA color){
+    private Orbit(int circlesamples, int radialsamples, float innerradius, float outradius, float scale, AssetManager assetManager, Node rootNode, ColorRGBA color){
         this.torus = new Torus(circlesamples, radialsamples, innerradius, outradius);
         this.geom = new Geometry("WhiteCircle", this.torus);
         this.mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         this.mat.setColor("Color", color);
         this.geom.setMaterial(this.mat);
-        this.geom.setLocalScale(1, 1, 0.01f);
+        this.geom.setLocalScale(1, scale, 0.01f);
         this.geom.rotate(-FastMath.PI/2, 0, 0);
         rootNode.attachChild(this.geom);
     }
