@@ -16,7 +16,13 @@ public class Planet{
     
     private final Sphere sphere ;
     private final Geometry geom;
-    private final Material mat;  
+    private final Material mat;
+    private final Node pivot;
+
+    private final float rotate;
+    private final float rotation;
+    private final float maxradius;
+    private final float minradius;
     
     private final String name ;
     private final double size;
@@ -25,17 +31,13 @@ public class Planet{
     @Setter
     private float angle = 0.0f;
 
-    //velocity initialization (abort code part for rotation using the newton's law of universal gravitation)
-    /*@Setter
-    private Vector3f velocity;*/
-
     //Factory
-    public static Planet newInstance(int zsample, int radialsample, float radius, AssetManager assetManager, String name, double size, double weight,Node rootNode, Node pivot, int angle){
-        return new Planet(zsample, radialsample, radius, assetManager,name, size, weight, rootNode, pivot, angle);
+    public static Planet newInstance(int zsample, int radialsample, float radius, AssetManager assetManager, float rotate, float rotation, float maxradius, float minradius, String name, double size, double weight,Node rootNode, Node pivot, int angle){
+        return new Planet(zsample, radialsample, radius, assetManager, rotate, rotation, maxradius, minradius, name, size, weight, rootNode, pivot, angle);
     }
 
     //Constructeur sans paramètres
-    private Planet(int zsample,int radialsample,float radius,AssetManager assetManager,String name,double size,double weight, Node rootNode, Node pivot, int angle){
+    private Planet(int zsample,int radialsample,float radius,AssetManager assetManager, float rotate, float rotation, float maxradius, float minradius,String name,double size,double weight, Node rootNode, Node pivot, int angle){
         this.sphere = new Sphere(zsample, radialsample, radius);
         this.geom = new Geometry("Sphere", this.sphere);  
         this.mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
@@ -48,6 +50,12 @@ public class Planet{
         rootNode.attachChild(this.geom);
 
         pivot.attachChild(this.geom);
+        this.pivot = pivot;
+
+        this.rotate = rotate;
+        this.rotation = rotation;
+        this.maxradius = maxradius;
+        this.minradius = minradius;
 
         this.name = name;
         this.size = size;
