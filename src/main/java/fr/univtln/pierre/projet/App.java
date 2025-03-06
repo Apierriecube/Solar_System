@@ -37,7 +37,9 @@ public class App extends SimpleApplication implements ActionListener {
    * - upperCam: boolean for the camera movement
    * 
    * - vr: speed of the rotation
+   * - pastvr: past speed
    * - pause: boolean for the pause
+   * - timeDirection: boolean for the time direction
    * 
    * - hudText: text of the HUD
    * - date: date
@@ -57,8 +59,10 @@ public class App extends SimpleApplication implements ActionListener {
   private boolean lowerCam = false;
   private boolean upperCam = false;
 
-  private int vr = 1;
+  private float vr = 1f;
+  private float pastvr = 0;
   private boolean pause = false;
+  private int timeDirection = 1;
 
   private BitmapText hudText;
   //date of the last planets alignment
@@ -114,14 +118,18 @@ public class App extends SimpleApplication implements ActionListener {
     inputManager.addListener(this, "UpperCam");
     inputManager.addMapping("LowerCam", new KeyTrigger(KeyInput.KEY_LSHIFT));
     inputManager.addListener(this, "LowerCam");
-    inputManager.addMapping("Speed", new KeyTrigger(KeyInput.KEY_NUMPAD3));
+
+    inputManager.addMapping("Speed", new KeyTrigger(KeyInput.KEY_NUMPAD1));
     inputManager.addListener(this, "Speed");
-    inputManager.addMapping("Slow", new KeyTrigger(KeyInput.KEY_NUMPAD1));
+    inputManager.addMapping("Slow", new KeyTrigger(KeyInput.KEY_NUMPAD2));
     inputManager.addListener(this, "Slow");
-    inputManager.addMapping("Stop", new KeyTrigger(KeyInput.KEY_NUMPAD2));
-    inputManager.addListener(this, "Stop");
-    inputManager.addMapping("Go", new KeyTrigger(KeyInput.KEY_NUMPAD5));
-    inputManager.addListener(this, "Go");
+    inputManager.addMapping("Pause", new KeyTrigger(KeyInput.KEY_RETURN));
+    inputManager.addListener(this, "Pause");
+    inputManager.addMapping("Forwards", new KeyTrigger(KeyInput.KEY_NUMPAD4));
+    inputManager.addListener(this, "Forwards");
+    inputManager.addMapping("Backwards", new KeyTrigger(KeyInput.KEY_NUMPAD5));
+    inputManager.addListener(this, "Backwards");
+
     inputManager.addMapping("Sun", new KeyTrigger(KeyInput.KEY_1));
     inputManager.addListener(this, "Sun");
     inputManager.addMapping("Mercury", new KeyTrigger(KeyInput.KEY_2));
@@ -200,37 +208,37 @@ public class App extends SimpleApplication implements ActionListener {
     rootNode.attachChild(soleilGeom);
 
     //mercury
-    planets.add(Planet.newInstance(32,32,1.5f,assetManager,0.1072f, 0.0714f, 141.0f, 137.99f,"Mercury", 2439.7, 3.3011e23, rootNode, pivots.get(0), 1));
+    planets.add(Planet.newInstance(32,32,1.5f,assetManager,0.1072f, 0.0714f, 141.0f, 137.99f, 7.00f,"Mercury", 2439.7, 3.3011e23, rootNode, pivots.get(0), 1));
     
     //venus
-    planets.add(Planet.newInstance(32,32,4f,assetManager, 0.0258f,0.02796f, 181.0f, 180.99f, "Venus", 6051.8, 4.8675e24, rootNode, pivots.get(1), 177));
+    planets.add(Planet.newInstance(32,32,4f,assetManager, 0.0258f,0.02796f, 181.0f, 180.99f, 3.39f, "Venus", 6051.8, 4.8675e24, rootNode, pivots.get(1), 177));
     
     //earth
-    planets.add(Planet.newInstance(32,32,4f,assetManager, 6.2832f,0.0172f, 217.0f, 216.97f,"Earth", 	6371, 5.972168e24, rootNode, pivots.get(2), 23));
+    planets.add(Planet.newInstance(32,32,4f,assetManager, 6.2832f,0.0172f, 217.0f, 216.97f, 1.85f,"Earth", 	6371, 5.972168e24, rootNode, pivots.get(2), 23));
     //moon
-    planets.add(Planet.newInstance(16,16,1f,assetManager, 0.2299f, 0.2299f, 6.0f, 6.0f,"Moon", 1737.4, 7.346e22, rootNode, pivots.get(2), 1));
-    planets.get(3).getGeom().setLocalTranslation(new Vector3f(6,0,0));
+    planets.add(Planet.newInstance(16,16,1f,assetManager, 0.2299f, 0.2299f, 6.0f, 6.0f, 0.00f,"Moon", 1737.4, 7.346e22, rootNode, pivots.get(2), 1));
+    planets.get(3).getSpatial().setLocalTranslation(new Vector3f(6,0,0));
 
     //mars
-    planets.add(Planet.newInstance(32,32,2f,assetManager, 6.1261f, 0.00915f, 275.0f, 273.80f,"Mars", 3389.5, 6.4171e23, rootNode, pivots.get(3), 25));
+    planets.add(Planet.newInstance(32,32,2f,assetManager, 6.1261f, 0.00915f, 275.0f, 273.80f, 1.85f,"Mars", 3389.5, 6.4171e23, rootNode, pivots.get(3), 25));
     //phobos
-    planets.add(Planet.newInstance(32,32,0.1f,assetManager, 1794.44f, 19.7047f, 2.22f, 2.22f,"Phobos", 11.08, 1.0659e16, rootNode, pivots.get(3), 1));
-    planets.get(5).getGeom().setLocalTranslation(new Vector3f(2.22f,0,0));
+    planets.add(Planet.newInstance(32,32,0.01f,assetManager, 1794.44f, 19.7047f, 2.22f, 2.22f, 0.00f,"Phobos", 11.08, 1.0659e16, rootNode, pivots.get(3), 1));
+    planets.get(5).getSpatial().setLocalTranslation(new Vector3f(2.22f,0,0));
     //deimos
-    planets.add(Planet.newInstance(32,32,0.1f,assetManager, 523.60f, 4.9771f, 3.67f, 3.67f, "Deimos", 6.27, 1.4762e15, rootNode, pivots.get(3), 1));
-    planets.get(6).getGeom().setLocalTranslation(new Vector3f(3.67f,0,0));
+    planets.add(Planet.newInstance(32,32,0.01f,assetManager, 523.60f, 4.9771f, 3.67f, 3.67f, 0.00f, "Deimos", 6.27, 1.4762e15, rootNode, pivots.get(3), 1));
+    planets.get(6).getSpatial().setLocalTranslation(new Vector3f(3.67f,0,0));
     
     //jupiter
-    planets.add(Planet.newInstance(32,32,40f,assetManager, 15.1750f, 0.00145f, 685.0f, 684.20f, "Jupiter", 69911, 1.8982e27, rootNode, pivots.get(4), 3));
+    planets.add(Planet.newInstance(32,32,40f,assetManager, 15.1750f, 0.00145f, 685.0f, 684.20f, 1.30f, "Jupiter", 69911, 1.8982e27, rootNode, pivots.get(4), 3));
     //io
-    planets.add(Planet.newInstance(32,32,1f,assetManager, 3.5512f, 3.5512f, 46.0f, 46.0f,"Io", 1821.6, 8.931938e22, rootNode, pivots.get(4), 1));
-    planets.get(8).getGeom().setLocalTranslation(new Vector3f(46,0,0));
+    planets.add(Planet.newInstance(32,32,1f,assetManager, 3.5512f, 3.5512f, 46.0f, 46.0f, 0.00f,"Io", 1821.6, 8.931938e22, rootNode, pivots.get(4), 1));
+    planets.get(8).getSpatial().setLocalTranslation(new Vector3f(46,0,0));
     //europe
-    planets.add(Planet.newInstance(32,32,1f,assetManager, 1.7690f, 1.7690f, 52.0f, 52.0f, "Europe", 1560.8, 4.799844e22, rootNode, pivots.get(4), 1));
-    planets.get(9).getGeom().setLocalTranslation(new Vector3f(52,0,0));
+    planets.add(Planet.newInstance(32,32,1f,assetManager, 1.7690f, 1.7690f, 52.0f, 52.0f, 0.00f, "Europe", 1560.8, 4.799844e22, rootNode, pivots.get(4), 1));
+    planets.get(9).getSpatial().setLocalTranslation(new Vector3f(52,0,0));
     
     //saturn
-    planets.add(Planet.newInstance(32,32,38f,assetManager, 14.1445f, 0.000585f, 1195.0f, 1193.09f, "Saturn", 58232, 5.6824e26, rootNode, pivots.get(5), 27));
+    planets.add(Planet.newInstance(32,32,38f,assetManager, 14.1445f, 0.000585f, 1195.0f, 1193.09f, 2.49f, "Saturn", 58232, 5.6824e26, rootNode, pivots.get(5), 27));
     //saturn's rings
     Torus ringShape = new Torus(100, 100, 5, 45);
     ringGeom = new Geometry("SaturnRings", ringShape);
@@ -245,21 +253,20 @@ public class App extends SimpleApplication implements ActionListener {
     pivots.get(5).attachChild(ringGeom);
 
     //uranus
-    planets.add(Planet.newInstance(32,32,16f,assetManager, 8.7482f, 0.000205f, 2217.0f, 2214.65f, "Uranus", 25362, 8.681e25, rootNode, pivots.get(6), 98));
+    planets.add(Planet.newInstance(32,32,16f,assetManager, 8.7482f, 0.000205f, 2217.0f, 2214.65f, 0.77f, "Uranus", 25362, 8.681e25, rootNode, pivots.get(6), 98));
     //neptune
-    planets.add(Planet.newInstance(32,32,15f,assetManager, 9.3693f, 0.000105f, 3337.0f, 	3336.88f, "Neptune", 24622, 1.02409e26, rootNode, pivots.get(7), 30));
-
+    planets.add(Planet.newInstance(32,32,15f,assetManager, 9.3693f, 0.000105f, 3337.0f, 	3336.88f, 1.77f, "Neptune", 24622, 1.02409e26, rootNode, pivots.get(7), 30));
 
 
     //creation of the orbits of the planets (mercurry to neptune)
-    Orbit(200, 200, 0.5f, 141, 0.978f,assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f), -1);
-    Orbit(200, 200, 0.5f, 181, 0.999f, assetManager, rootNode, new ColorRGBA(0.7f,0.4f,0f,1f), -1);
-    Orbit(200, 200, 0.5f, 217, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0.4f,1f,1f), -1);
-    Orbit(200, 200, 0.5f, 275, 0.995f, assetManager, rootNode, new ColorRGBA(0.8f,0.1f,0f,1f), -1);
-    Orbit(200, 200, 0.5f, 685, 0.998f, assetManager, rootNode, ColorRGBA.Brown, -1);
-    Orbit(200, 200, 0.5f, 1195, 0.998f, assetManager, rootNode, new ColorRGBA(0.9f,0.6f,0f,1f), -1);
-    Orbit(200, 200, 0.5f, 2217, 0.998f, assetManager, rootNode, new ColorRGBA(0f,1f,1f,1f), -1);
-    Orbit(200, 200, 0.5f, 3337, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0f,1f,1f), -1);
+    Orbit(200, 200, 0.5f, 141.5f, 0.978f,assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f), 0);
+    Orbit(200, 200, 0.5f, 181, 0.999f, assetManager, rootNode, new ColorRGBA(0.7f,0.4f,0f,1f), 1);
+    Orbit(200, 200, 0.5f, 217, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0.4f,1f,1f), 2);
+    Orbit(200, 200, 0.5f, 275, 0.995f, assetManager, rootNode, new ColorRGBA(0.8f,0.1f,0f,1f), 4);
+    Orbit(200, 200, 0.5f, 685, 0.998f, assetManager, rootNode, ColorRGBA.Brown, 7);
+    Orbit(200, 200, 0.5f, 1195, 0.998f, assetManager, rootNode, new ColorRGBA(0.9f,0.6f,0f,1f), 10);
+    Orbit(200, 200, 0.5f, 2217, 0.998f, assetManager, rootNode, new ColorRGBA(0f,1f,1f,1f), 11);
+    Orbit(200, 200, 0.5f, 3337, 0.999f, assetManager, rootNode, new ColorRGBA(0f,0f,1f,1f), 12);
 
     //translation of the pivots to their respective distances
     List<Integer> distances = new ArrayList<>(Arrays.asList(141, 181, 217, 275, 685, 1195, 2217, 3337));
@@ -311,10 +318,10 @@ public class App extends SimpleApplication implements ActionListener {
     mat.setColor("Color", color);
     geom.setMaterial(mat);
     geom.setLocalScale(1, scale, 0.01f);
-    geom.rotate(-FastMath.PI/2, 0, 0);
+    geom.rotate(-FastMath.PI/2 - (float) Math.toRadians( planets.get(idp).getDegree()), 0, 0);
     rootNode.attachChild(geom);
-    if (idp != -1){
-      geom.setLocalTranslation(planets.get(idp).getGeom().getLocalTranslation());
+    if (idp != 3 && idp != 5 && idp != 6 && idp != 8 && idp != 9){
+      geom.setLocalTranslation(planets.get(idp).getSpatial().getLocalTranslation());
     }
     return geom;
   }
@@ -325,7 +332,7 @@ public class App extends SimpleApplication implements ActionListener {
 
 
 
-  public void rotation(Node node, Planet planet, float speed,float a,float b){ 
+  public void rotation(Node node, Planet planet, float speed,float a,float b, float inclination){ 
     /*
      * Rotation of the planets and moons on their own axis and around the sun/planets:
      * 
@@ -334,18 +341,20 @@ public class App extends SimpleApplication implements ActionListener {
      * - speed: speed of the rotation
      * - a: max radius of the orbit
      * - b: min radius of the orbit
+     * - inclination: inclination of the orbit
      */
 
     float angle = planet.getAngle();
     angle += speed;
-    float x = a * (float) Math.cos(angle);  
+    float x = a * (float) Math.cos(angle);
+    float y = b * (float) Math.sin(inclination) * (float) Math.sin(angle);
     float z = b * (float) Math.sin(angle);  
     planet.setAngle(angle);
     if (node.getName().equals(planet.getName())){
-      node.setLocalTranslation( x, node.getLocalTranslation().getY(), z);
+      node.setLocalTranslation( x, y, z);
     }
     else{
-      planet.getGeom().setLocalTranslation( x, planet.getGeom().getLocalTranslation().getY(), z);
+      planet.getSpatial().setLocalTranslation( x, y, z);
     }
 
   }
@@ -385,8 +394,8 @@ public class App extends SimpleApplication implements ActionListener {
     soleilGeom.rotate(0, 0, (float) (0.2476*tpf));
     ringGeom.rotate(0, 0, (float) (0.0121*tpf));
     for (Planet planet : planets){
-      planet.getGeom().rotate(0, 0, (float) (planet.getRotate()*tpf));
-      rotation(planet.getPivot(), planet, -(float) planet.getRotation()*tpf, planet.getMaxradius(), planet.getMinradius());
+      planet.getSpatial().rotate(0, 0, (float) (planet.getRotate()*tpf));
+      rotation(planet.getPivot(), planet, -(float) planet.getRotation()*tpf, planet.getMaxradius(), planet.getMinradius(), (float) Math.toRadians( planet.getDegree()));
     }
 
     //camera follow the planet
@@ -400,30 +409,32 @@ public class App extends SimpleApplication implements ActionListener {
       }
       else{
         //test if the planet has moons (one, two or none)
-        if (planets.get(planets.indexOf(followedPlanet)+1).getPivot().getName().equals(followedPlanet.getName())){
-          Planet moon = planets.get(planets.indexOf(followedPlanet)+1);
-          if (planets.get(planets.indexOf(followedPlanet)+2).getPivot().getName().equals(followedPlanet.getName())){
-            Planet moon2 = planets.get(planets.indexOf(followedPlanet)+2);
-            //HUD update (speed, pause, date, flycam,followed planet, first moon, second moon)
-            hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
-            + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg"
-            + "\n--------------------------------------\n" + "First moon: " + moon.getName() + "\n" + "Size: " + moon.getSize() + " km" + "\n" + "Weight: " + moon.getWeight() + " kg"
-            + "\n--------------------------------------\n" + "Second moon: " + moon2.getName() + "\n" + "Size: " + moon2.getSize() + " km" + "\n" + "Weight: " + moon2.getWeight() + " kg");
+        if (planets.indexOf(followedPlanet)!=12){
+          if (planets.get(planets.indexOf(followedPlanet)+1).getPivot().getName().equals(followedPlanet.getName())){
+            Planet moon = planets.get(planets.indexOf(followedPlanet)+1);
+            if (planets.get(planets.indexOf(followedPlanet)+2).getPivot().getName().equals(followedPlanet.getName())){
+              Planet moon2 = planets.get(planets.indexOf(followedPlanet)+2);
+              //HUD update (speed, pause, date, flycam,followed planet, first moon, second moon)
+              hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
+              + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg"
+              + "\n--------------------------------------\n" + "First moon: " + moon.getName() + "\n" + "Size: " + moon.getSize() + " km" + "\n" + "Weight: " + moon.getWeight() + " kg"
+              + "\n--------------------------------------\n" + "Second moon: " + moon2.getName() + "\n" + "Size: " + moon2.getSize() + " km" + "\n" + "Weight: " + moon2.getWeight() + " kg");
+            }
+            else{
+              //HUD update (speed, pause, date, flycam,followed planet, first moon)
+              hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
+              + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg"
+              + "\n--------------------------------------\n" + "Moon: " + moon.getName() + "\n" + "Size: " + moon.getSize() + " km" + "\n" + "Weight: " + moon.getWeight() + " kg");
+            }
           }
           else{
-            //HUD update (speed, pause, date, flycam,followed planet, first moon)
+            //HUD update (speed, pause, date, flycam,followed planet)
             hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
-            + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg"
-            + "\n--------------------------------------\n" + "Moon: " + moon.getName() + "\n" + "Size: " + moon.getSize() + " km" + "\n" + "Weight: " + moon.getWeight() + " kg");
+            + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg");
           }
-        }
-        else{
-          //HUD update (speed, pause, date, flycam,followed planet)
-          hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
-          + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg");
-        }
 
-      }
+        }
+    }
     }
     else{
       //HUD update (speed, pause, date, flycam)
@@ -459,8 +470,9 @@ public class App extends SimpleApplication implements ActionListener {
      * 
      * numpad 1: speed up
      * numpad 2: speed down
-     * numpad 4: pause
-     * numpad 5: play
+     * numpad 4: forwards
+     * numpad 5: backwards
+     * return: pause
      * 
      * 1: follow the sun
      * 2: follow mercury
@@ -485,18 +497,45 @@ public class App extends SimpleApplication implements ActionListener {
 
     //speed up, speed down, pause and play management
     if (name.equals("Speed") && !pause) {
-      vr += 10;
+      if (Math.abs(vr) < 1){
+        vr += 0.1f * timeDirection;
+      }
+      else{
+        vr += 10 * timeDirection;
+      }
+      
     }
     if (name.equals("Slow") && !pause) {
-      vr -= 10;
+      if (Math.abs(vr) > 10){
+        vr -= 10 * timeDirection;
+      }
+      if (Math.abs(vr) <= 1 && Math.abs(vr) > 0.1f){
+        vr -= 0.1f * timeDirection;
+      }
     }
-    if (name.equals("Stop")) {
-      pause = true;
-      vr = 0;
+    if (name.equals("Pause") && isPressed) {
+      if (pause){
+        vr = pastvr;
+        pause = false;
+        pastvr = 0;
+      }
+      else{
+        pastvr = vr;
+        pause = true;
+        vr = 0;
+      }
     }
-    if (name.equals("Go")) {
-      pause = false;
-      vr = 1;
+    if (name.equals("Forwards") && !pause) {
+      if (timeDirection == -1){
+        vr = -vr;
+        timeDirection = 1;
+      }
+    }
+    if (name.equals("Backwards") && !pause) {
+      if (timeDirection == 1){
+        vr = -vr;
+        timeDirection = -1;
+      }
     }
 
     //camera follow the planet management
