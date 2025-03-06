@@ -13,17 +13,35 @@ import lombok.Setter;
 
 @Getter
 public class Planet{
+    /*Initialization of a planet:
+     * 
+     * - zsample: number of samples along the z-axis
+     * - radialsample: number of samples along the radial
+     * - radius: radius of the planet
+     * - assetManager: the assetManager
+     * - rotate: the speed of rotation of the planet
+     * - rotation: the speed of rotation of the planet around the sun
+     * - maxradius: the maximum distance from the sun
+     * - minradius: the minimum distance from the sun
+     * - name: the name of the planet
+     * - size: the size of the planet
+     * - weight: the weight of the planet
+     * - rootNode: the rootNode
+     * - pivot: the pivot
+     * - angle: the angle of the planet
+     */
     
-    private final Sphere sphere ;
+    //planet parameters for the creation
     private final Geometry geom;
-    private final Material mat;
     private final Node pivot;
 
+    //planet parameters for the rotations
     private final float rotate;
     private final float rotation;
     private final float maxradius;
     private final float minradius;
     
+    //planet parameters for the HUD
     private final String name ;
     private final double size;
     private final double weight;
@@ -38,25 +56,29 @@ public class Planet{
 
     //Constructeur sans paramètres
     private Planet(int zsample,int radialsample,float radius,AssetManager assetManager, float rotate, float rotation, float maxradius, float minradius,String name,double size,double weight, Node rootNode, Node pivot, int angle){
-        this.sphere = new Sphere(zsample, radialsample, radius);
-        this.geom = new Geometry("Sphere", this.sphere);  
-        this.mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
-        this.mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/ColoredTex/" + name + ".jpg"));
-        this.mat.setBoolean("UseMaterialColors",true);
-        this.mat.setColor("Ambient", ColorRGBA.White);  
-        this.mat.setColor("Diffuse", ColorRGBA.White);
-        this.geom.setMaterial(this.mat);
+        //planet creation (sphere, geometry, material, rotation, texture)
+        Sphere sphere = new Sphere(zsample, radialsample, radius);
+        this.geom = new Geometry("Sphere", sphere);  
+        Material mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
+        mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/Planets/" + name + ".jpg"));
+        mat.setBoolean("UseMaterialColors",true);
+        mat.setColor("Ambient", ColorRGBA.White);  
+        mat.setColor("Diffuse", ColorRGBA.White);
+        this.geom.setMaterial(mat);
         this.geom.rotate(-FastMath.PI/2, 0, -FastMath.DEG_TO_RAD * angle);
-        rootNode.attachChild(this.geom);
 
+        //planet attachment to the rootNode and right pivot
+        rootNode.attachChild(this.geom);
         pivot.attachChild(this.geom);
         this.pivot = pivot;
 
+        //planet parameters for the rotations
         this.rotate = rotate;
         this.rotation = rotation;
         this.maxradius = maxradius;
         this.minradius = minradius;
 
+        //planet parameters for the HUD
         this.name = name;
         this.size = size;
         this.weight = weight;
