@@ -94,5 +94,35 @@ public class Planet{
         this.size = size;
         this.weight = weight;
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+  public void rotation(float tpf){ 
+    /*
+     * Rotation of the planets and moons on their own axis and around the sun/planets:
+     * 
+     * - node: node of the planet (pivot)
+     * - planet: planet or moon
+     * - speed: speed of the rotation
+     * - a: max radius of the orbit
+     * - b: min radius of the orbit
+     * - inclination: inclination of the orbit
+     */
+
+
+    this.angle += -(float) this.getRotation()*tpf;
+    float x = this.maxradius * (float) Math.cos(this.angle);
+    float y = this.minradius * (float) Math.sin((float) Math.toRadians(this.getDegree())) * (float) Math.sin(this.angle);
+    float z = this.minradius * (float) Math.sin(this.angle);  
+    if (this.pivot.getName().equals(this.getName())){
+        this.pivot.setLocalTranslation( x, y, z);
+    }
+    else{
+        this.getSpatial().setLocalTranslation( x, y, z);
+    }
+
+  }
 }
 

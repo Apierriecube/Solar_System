@@ -388,39 +388,6 @@ public class App extends SimpleApplication implements ActionListener {
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-  public void rotation(Node node, Planet planet, float speed,float a,float b, float inclination){ 
-    /*
-     * Rotation of the planets and moons on their own axis and around the sun/planets:
-     * 
-     * - node: node of the planet (pivot)
-     * - planet: planet or moon
-     * - speed: speed of the rotation
-     * - a: max radius of the orbit
-     * - b: min radius of the orbit
-     * - inclination: inclination of the orbit
-     */
-
-    float angle = planet.getAngle();
-    angle += speed;
-    float x = a * (float) Math.cos(angle);
-    float y = b * (float) Math.sin(inclination) * (float) Math.sin(angle);
-    float z = b * (float) Math.sin(angle);  
-    planet.setAngle(angle);
-    if (node.getName().equals(planet.getName())){
-      node.setLocalTranslation( x, y, z);
-    }
-    else{
-      planet.getSpatial().setLocalTranslation( x, y, z);
-    }
-
-  }
-
-
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
   @Override
   public void simpleUpdate(float tpf) {
     /* Update of the application:
@@ -453,7 +420,7 @@ public class App extends SimpleApplication implements ActionListener {
     kuiper.rotate(0, (float) (0.00009*tpf), 0);
     for (Planet planet : planets){
       planet.getSpatial().rotate(0, 0, (float) (planet.getRotate()*tpf));
-      rotation(planet.getPivot(), planet, -(float) planet.getRotation()*tpf, planet.getMaxradius(), planet.getMinradius(), (float) Math.toRadians( planet.getDegree()));
+      planet.rotation(tpf);
     }
 
     //camera follow the planet
