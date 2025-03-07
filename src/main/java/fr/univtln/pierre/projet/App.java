@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
@@ -15,10 +16,12 @@ import com.jme3.light.PointLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.scene.shape.Torus;
 import com.jme3.system.AppSettings;
@@ -30,6 +33,7 @@ public class App extends SimpleApplication implements ActionListener {
    * - planets: list of the planets
    * - soleilGeom: geometry of the sun
    * - ringGeom: geometry of the saturn's ring
+   * - kuiper: node of the kuiper belt
    * 
    * - pivots: list of the pivots
    * 
@@ -53,6 +57,7 @@ public class App extends SimpleApplication implements ActionListener {
   private final List<Planet> planets = new ArrayList<>();
   private Geometry soleilGeom;
   private Geometry ringGeom;
+  private final Node kuiper = new Node("kuiper");
 
   private final List<Node> pivots = new ArrayList<>();
 
@@ -240,7 +245,7 @@ public class App extends SimpleApplication implements ActionListener {
     //saturn
     planets.add(Planet.newInstance(32,32,38f,assetManager, 14.1445f, 0.000585f, 1195.0f, 1193.09f, 2.49f, "Saturn", 58232, 5.6824e26, rootNode, pivots.get(5), 27));
     //saturn's rings
-    Torus ringShape = new Torus(100, 100, 5, 45);
+    Torus ringShape = new Torus(100, 100, 15, 58);
     ringGeom = new Geometry("SaturnRings", ringShape);
     Material ringMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     ringMat.setTexture("ColorMap", assetManager.loadTexture("Textures/Planets/SaturnRing.png"));
@@ -257,6 +262,58 @@ public class App extends SimpleApplication implements ActionListener {
     //neptune
     planets.add(Planet.newInstance(32,32,15f,assetManager, 9.3693f, 0.000105f, 3337.0f, 	3336.88f, 1.77f, "Neptune", 24622, 1.02409e26, rootNode, pivots.get(7), 30));
 
+    Random random = new Random();
+    
+    //kuiper belt creation
+    for (int i = 0; i < 7000; i++) {
+
+      
+      int choice = random.nextInt(3);
+      Material mat;
+      Spatial asteroid;
+
+      switch (choice) {
+          case 0 ->                 {
+                  asteroid = assetManager.loadModel("3DModel/Eros.glb");
+                  asteroid.setLocalScale(0.002f);
+                  mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
+                  mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/Asteroids/Eros.png"));
+                }
+          case 1 ->                 {
+                  asteroid = assetManager.loadModel("3DModel/Itokawa.glb");
+                  asteroid.setLocalScale(0.02f);
+                  mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
+                  mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/Asteroids/Itokawa.jpg"));
+                }
+          default ->                 {
+                  asteroid = assetManager.loadModel("3DModel/Vesta.glb");
+                  asteroid.setLocalScale(0.002f);
+                  mat = new Material(assetManager,"Common/MatDefs/Light/Lighting.j3md");
+                  mat.setTexture("DiffuseMap", assetManager.loadTexture("Textures/Asteroids/Vesta.jpg"));
+                }
+        }
+
+      mat.setBoolean("UseMaterialColors",true);
+      mat.setColor("Ambient", ColorRGBA.White);  
+      mat.setColor("Diffuse", ColorRGBA.White);
+      asteroid.setMaterial(mat);
+  
+      // Random position in a circular belt
+      float angle = FastMath.nextRandomFloat() * FastMath.TWO_PI;
+      float radius = 6337f + FastMath.nextRandomFloat() * 2000f;
+      float x = FastMath.cos(angle) * radius;
+      float z = FastMath.sin(angle) * radius;
+      float y = -300 + (FastMath.nextRandomFloat() - 0.5f) * 800f;
+
+      float randomX = FastMath.nextRandomFloat() * FastMath.TWO_PI;
+      float randomY = FastMath.nextRandomFloat() * FastMath.TWO_PI;
+      float randomZ = FastMath.nextRandomFloat() * FastMath.TWO_PI;
+      asteroid.setLocalRotation(new Quaternion().fromAngles(randomX, randomY, randomZ));
+  
+      asteroid.setLocalTranslation(x, y, z);
+      kuiper.attachChild(asteroid);
+    }
+    rootNode.attachChild(kuiper);
 
     //creation of the orbits of the planets (mercurry to neptune)
     Orbit(200, 200, 0.5f, 141.5f, 0.978f,assetManager, rootNode, new ColorRGBA(0.4f,0.4f,0.4f,1f), 0);
@@ -393,6 +450,7 @@ public class App extends SimpleApplication implements ActionListener {
     //rotation of the planets and moons on their own axis and around the sun/planets
     soleilGeom.rotate(0, 0, (float) (0.2476*tpf));
     ringGeom.rotate(0, 0, (float) (0.0121*tpf));
+    kuiper.rotate(0, (float) (0.00009*tpf), 0);
     for (Planet planet : planets){
       planet.getSpatial().rotate(0, 0, (float) (planet.getRotate()*tpf));
       rotation(planet.getPivot(), planet, -(float) planet.getRotation()*tpf, planet.getMaxradius(), planet.getMinradius(), (float) Math.toRadians( planet.getDegree()));
@@ -410,9 +468,9 @@ public class App extends SimpleApplication implements ActionListener {
       else{
         //test if the planet has moons (one, two or none)
         if (planets.indexOf(followedPlanet)!=12){
-          if (planets.get(planets.indexOf(followedPlanet)+1).getPivot().getName().equals(followedPlanet.getName())){
+          if (planets.get(planets.indexOf(followedPlanet)+1).getPivot().getName().equals(planets.get(planets.indexOf(followedPlanet)).getName())){
             Planet moon = planets.get(planets.indexOf(followedPlanet)+1);
-            if (planets.get(planets.indexOf(followedPlanet)+2).getPivot().getName().equals(followedPlanet.getName())){
+            if (planets.get(planets.indexOf(followedPlanet)+2).getPivot().getName().equals(planets.get(planets.indexOf(followedPlanet)).getName())){
               Planet moon2 = planets.get(planets.indexOf(followedPlanet)+2);
               //HUD update (speed, pause, date, flycam,followed planet, first moon, second moon)
               hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
@@ -432,7 +490,11 @@ public class App extends SimpleApplication implements ActionListener {
             hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
             + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg");
           }
-
+        }
+        else{
+          //HUD update (speed, pause, date, flycam,followed planet)
+          hudText.setText("Speed: " + vr + "x" + "\n" + "Pause: " + pause + "\n" + "Time: " + specificDate + "\nFlycam: off \n --------------------------------------" + "\n" 
+          + "Followed planet: " + followedPlanet.getName() + "\n" + "Size: " + followedPlanet.getSize() + " km" + "\n" + "Weight: " + followedPlanet.getWeight() + " kg");
         }
     }
     }
